@@ -1,0 +1,122 @@
+@startuml FHIR Bonnie Model
+
+class Patient <<Collection>> {
+    id: ObjectId
+    expected_values: []
+    notes: String
+    measure_ids: String[]
+    fhir_patient: FHIR::Patient
+    data_elements: DataElement[]
+    ==
+    created_at: DateTime
+    updated_at: DateTime
+}
+
+class Measure <<Collection>> {
+    id: ObjectId
+    cms_id: String
+    title: String
+    description: String
+    set_id: String
+    calculation_method: String ('PATIENT' | 'EPISODE_OF_CARE)
+    calculate_sdes: boolean
+    fhir_measure: FHIR::Measure
+    libraries: FHIR::Library[]
+    value_sets: FHIR::ValueSet[]
+    cql_libraries: CqmLogicLibrary[]
+    main_cql_library: string
+    source_data_criteria: DataElement[]
+    population_sets: PopulationSet[]
+    measure_period: Period
+    code_systems_by_name: Array<Array<string>>
+    ==
+    created_at: DateTime
+    updated_at: DateTime
+}
+
+class DataElement {
+    codeListId: String
+    valueSetTitleId: String
+    description: String
+    fhir_resource: FHIR::DomainResource
+}
+
+class FHIR::DomainResource <<FHIR>> {
+
+}
+note bottom of "FHIR::DomainResource"
+FHIR Resource element
+end note
+
+class PopulationSet {
+}
+note bottom of "PopulationSet"
+ PopulationSet consist of populations,
+ stratifications, statement references
+ and observations
+end note
+
+class CqmLogicLibrary {
+    library_name: String,
+    library_version: String,
+    cql: String,
+    elm: Mixed,
+    elm_annotations: Mixed,
+    is_main_library: { type: Boolean, default: false },
+    is_top_level: { type: Boolean, default: true },
+    statement_dependencies: [StatementDependency],
+}
+
+class StatementDependency {
+    statement_name: String,
+}
+
+class StatementReference {
+  library_name: String,
+  statement_name: String,
+  hqmf_id: String,
+}
+
+FHIR::Patient "1" *- "1" Patient : < contains
+
+Patient "*" o-down- "*" Measure
+
+PopulationSet "*" *- Measure
+
+FHIR::ValueSet "*" *- Measure
+
+DataElement  "*" *-up- "1" Patient : < has data elements
+
+DataElement  "*" *-up- "1" Measure : < can create data elements
+
+FHIR::DomainResource "1" *-  "1" DataElement
+
+CqmLogicLibrary "*" *-up- "1" Measure
+FHIR::Library "*" *-up- "1" Measure
+note bottom of "FHIR::Library"
+<font color="red">
+ Not used ?
+end note
+
+StatementDependency "*" *-left- "1" CqmLogicLibrary
+StatementReference "*" *-left- "1" StatementDependency
+
+class User <<Collection>> {
+    id: ObjectId
+    email: String
+    first_name: String
+    last_name: String
+    harp_id: String
+    // Other fields
+}
+
+class Group <<Collection>> {
+    name: String
+    is_personal: boolean
+}
+
+Measure o-- Group
+Patient o-- Group
+User o-- Group: > belongsTo
+
+@enduml

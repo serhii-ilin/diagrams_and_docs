@@ -1,0 +1,163 @@
+@startuml Measure Model
+
+title Proposed Measure Model in Madie
+
+class Measure <<Collection>> {
+    ObjectId id  <PK>
+    String measureHumanReadableId
+    String measureSetId
+    String version
+    String revisionNumber
+    String state ['Draft' | 'Packaged']
+    String name
+    String cql
+    == ownership / sharing ==
+    <color:red>TO BE DEFINED</color>
+    == audit ==
+    DateTime createdAt
+    User createdBy
+    DateTime updatedAt
+    User updatedBy
+}
+
+note right of Measure::id
+Internal PK, hidden from user
+end note
+note right of Measure::measureHumanReadableId
+Human readable ID of a measure
+end note
+note right of Measure::measureSetId
+Family ID
+end note
+note right of Measure::cql
+Base64 CQL
+end note
+
+class ModelVersion <<Embedded>> {
+    String model
+    String modelVersion
+}
+
+Measure "1" -up-* "1..*" ModelVersion
+
+
+class MeasureMetaData <<Embedded>> {
+== common fields ==
+add based on the UI screens
+}
+
+class LibraryMetaData <<Embedded>> {
+== common fields ==
+add based on the UI screens
+}
+
+class ProfileMetadata {
+    String model
+== profile specific fields ==
+    ...
+}
+
+
+Measure "1" --* "1" MeasureMetaData
+
+MeasureMetaData "1" --* "*" ProfileMetadata
+LibraryMetaData "1" --* "*" ProfileMetadata
+
+ProfileMetadata <|-- FHIMetaData
+ProfileMetadata <|-- QDMMetaData
+ProfileMetadata <|-- QICoreProfileMetadata
+ProfileMetadata <|-- USCoreProfileMetadata
+
+
+Measure "1" --* MeasureCompiled
+
+note bottom of MeasureCompiled
+Holds minimum cashed information
+necessary for a measure execution.
+If present, can be reused for packaging.
+<b>Note:</b> measure model is actually
+ not needed for execution.
+Maybe:
+- Cashed ValueSets
+- ELM of the main lib and dependencies
+end note
+
+Measure "1" --* "1" MeasurePackage
+
+class MeasurePackage <<Collection>> {
+    ObjectId id  <PK>
+    ObjectId measureId <FK>
+    String measureHumanReadableId
+    Binary binaryPackage
+    == audit ==
+    DateTime createdAt
+    User createdBy
+    DateTime updatedAt
+    User updatedBy
+}
+
+note bottom of MeasurePackage {
+ Moved into a separate collection
+ due to its size
+}
+
+class MeasureCompiled <<Collection>> {
+    == TO BE DEFINED ==
+    See cql-execution arguments
+
+}
+
+MeasureCompiled "1" --* "1..*" CachedELM
+MeasureCompiled "1" --* "1..*" CachedValueSet
+
+class Library <<Collection>> {
+    ObjectId id  <PK>
+    String libraryId
+    String version
+    String revisionNumber
+    String state ['Draft' | 'Packaged']
+    String name
+    String cql
+    == ownership / sharing ==
+    <color:red>TO BE DEFINED</color>
+    == audit ==
+    DateTime createdAt
+    User createdBy
+    DateTime updatedAt
+    User updatedBy
+}
+
+
+Library "1" --* "1" LibraryMetaData
+
+MeasurePackage "1" -* "1" MeasureModel : measureModel
+
+'FIXME composite measure
+
+'FIXME libraries / dependencies
+
+
+Measure "1" --* Dependency
+Library "1" --* Dependency
+
+class Dependency <<Embedded>> {
+    String name
+    String version
+    String model
+    String modelVersion
+}
+
+abstract class MeasureModel <<Embedded>> {
+}
+
+MeasureModel <|-- FHIR::Measure
+MeasureModel <|-- QDM::Measure
+
+
+legend
+ * Composite measures are out of scope
+ * Constrains are implemented as business rules at servuce layer
+ * Basic indices are implemented on MongoDB level for quck simple search
+endlegend
+
+@enduml

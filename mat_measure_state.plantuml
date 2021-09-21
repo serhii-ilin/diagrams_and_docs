@@ -1,0 +1,21 @@
+@startuml
+
+title MAT - State of a Measure
+
+[*] -down-> Draft: New Measure
+
+Draft --> [*]: Delete
+
+Draft --> Draft: Edit
+
+Draft --> Draft: Package
+
+Draft --> Versioned: Create a Version
+
+Versioned -left-> Draft: Create a Draft
+
+Versioned --> [*]: Delete
+
+note right of Versioned : Versioned\n and Packaged
+
+@enduml

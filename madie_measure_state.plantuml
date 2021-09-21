@@ -1,0 +1,36 @@
+@startuml
+
+title Madie - State of a Measure
+
+[*] -down-> Draft: New Measure
+
+state Draft {
+    [*] -> NotExecutableDraft
+    state NotExecutableDraft
+    state ExecutableDraft
+}
+
+Draft --> [*]: Delete
+
+Draft --> Draft: Edit
+
+NotExecutableDraft --> ExecutableDraft: Package
+NotExecutableDraft --> ExecutableDraft: Compile
+ExecutableDraft -> ExecutableDraft: Execute
+
+note top of Draft
+Draft is not executable by default
+Compilation is a light version of packaging
+end note
+
+Draft --> Versioned: Create a Version
+
+Versioned --> Draft: Create a Draft
+
+Versioned --> [*]: Delete
+
+Versioned --> Versioned: Execute
+
+note bottom of Versioned : Versioned\n and Packaged
+
+@enduml

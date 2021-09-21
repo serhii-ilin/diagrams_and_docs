@@ -1,0 +1,163 @@
+@startuml MAT Measure Model
+
+class Measure {
+    id: String
+    abbrName: String
+    description: String
+    measureModel: String
+    version: String
+    revisionNumber: String
+    measureScoring: String
+    compositeScoring: String
+    exportedDate: DateTime
+    lockedOutDate: DateTime
+    draft: boolean
+    finalizedDate: DateTime
+    valueSetDate: DateTime
+    eMeasureId: int
+    isPrivate: boolean
+    releaseVersion: String
+    patientBased: boolean
+    lastModifiedOn: DateTime
+    qdmVersion: String
+    fhirVersion: String
+    isCompositeMeasure: boolean
+    measureStewardId: String
+    nqfNumber: String
+    measurementPeriodFrom: DateTime
+    measurementPeriodTo: DateTime
+    cqlLibraryName: String
+    experimental: boolean
+    populationBasis: String
+    sourceMeasureId: String
+}
+
+class MeasureXml {
+    measureXML: Blog
+}
+
+note right of MeasureXml
+ Used as a primary source of CQL,
+ Human Readable, Populations,
+ Stratifications, etc
+end note
+
+Measure "1" -down-* MeasureXml
+Measure -- User : < ownedBy
+Measure -- User : < lockedBy
+Measure -- User : < lastModifiedBy
+Measure  "1" -* MeasureShare
+
+MeasureShare -- User: > owner
+MeasureShare -- User: > shareUser
+
+class MeasureShare {
+    shareLevel
+}
+
+Measure "1" -* "1" MeasureSet
+
+class ComponentMeasure {
+    alias: String
+}
+
+Measure "1" -o  "*" ComponentMeasure
+
+Measure "1" -- "1" ComponentMeasure: < compositeMeasure
+Measure "1" -- "1" ComponentMeasure: < componentMeasure
+Measure --o "*" MeasureType
+
+class MeasureType {
+    abbrName: String in COMPOSITE | RESOURCE | OUTCOME ...
+}
+
+(Measure, MeasureType) -- MeasureAssociationType
+
+class Organization {
+    organizationName: String
+    organizationOID: String
+}
+
+Measure --o "*" Organization: measureDevelopers
+(Measure, Organization) -- MeasureDeveloperAssociation
+
+Measure "1" --* "1" MeasureDetails
+
+class MeasureDetails {
+	description: String
+	copyright: String
+	disclaimer: String
+	stratification: String
+	riskAdjustment: String
+	rateAggregation: String
+	rationale: String
+	clinicalRecommendation: String
+	improvementNotation: String
+	definition: String
+	guidance: String
+	transmissionFormat: String
+	initialPopulation: String
+	denominator: String
+	denominatorExclusions: String
+	numerator: String
+	numeratorExclusions: String
+	measureObservations: String
+	measurePopulation: String
+	measurePopulationExclusions: String
+	denominatorExceptions: String
+	supplementalDataElements: String
+	measureSet: String
+}
+
+MeasureDetails "1" --* "*" MeasureDetailsReference
+
+class MeasureDetailsReference {
+    reference: String
+    referenceTypes:  CITATION | DOCUMENTATION | JUSTIFICATION | UNKNOWN
+}
+
+Measure "1" -up-* "*" CQLLibraryHistory
+
+CQLLibraryHistory - User: < lastModifiedBy
+
+class CQLLibraryHistory {
+    cqlLibraryString: String
+    lastModifiedOn: DateTime
+    isFreeTextEditorUsed: boolean
+}
+
+CQLLibraryHistory "*" -up-o "1" CQLLibrary
+User -- CQLLibrary:  < owner
+User -- CQLLibrary:  < lockedBy
+
+class CQLLibrary {
+    name: String
+    measureId: String
+    setId: String
+    version: String
+    draft: true
+    finalizedDate: DateTime
+    releaseVersion: String
+    revisionNumber: String
+    qdmVersion: String
+    fhirVersion: String
+    lockedOutDate: DateTime
+    lastModifiedOn: DateTime
+    cqlXML: Blob
+    libraryModelType: String
+    severeErrorCql: String
+    stewardId: String
+    description: String
+    isExperimental: boolean
+}
+
+CQLLibrary --o CQLLibraryShare
+
+class CQLLibraryShare {
+    shareLevel
+}
+
+CQLLibraryShare -- User: > owner
+CQLLibraryShare -- User: > shareUser
+
+@enduml

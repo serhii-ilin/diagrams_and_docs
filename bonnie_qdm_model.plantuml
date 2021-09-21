@@ -1,4 +1,4 @@
-@startuml QDM Model
+@startuml QDM Bonnie Model
 
 class QDMPatient {
      birthDatetime: DateTime,
@@ -34,8 +34,8 @@ class Measure <<Collection>> {
     component: boolean
     component_hqmf_set_ids: [String],
     composite_hqmf_set_id: String,
-    measure_scoring: enum: ['PROPORTION', 'RATIO', 'CONTINUOUS_VARIABLE', 'COHORT'],
-    calculation_method: enum: ['PATIENT', 'EPISODE_OF_CARE'],
+    measure_scoring: String ('PROPORTION', 'RATIO', 'CONTINUOUS_VARIABLE', 'COHORT']
+    calculation_method: String ('PATIENT' | 'EPISODE_OF_CARE)
     calculate_sdes: Boolean,
     cql_libraries: [CQLLibrary],
     main_cql_library: String,
@@ -43,10 +43,19 @@ class Measure <<Collection>> {
     source_data_criteria: []
     measure_period: Interval
     measure_attributes: []
+    ==
+    created_at: DateTime
+    updated_at: DateTime
 }
 
 class PopulationSet {
 }
+
+note bottom of "PopulationSet"
+ PopulationSet consist of populations,
+ stratifications, statement references
+ and observations
+end note
 
 class MeasurePackage <<Collection>> {
     id: ObjectId
@@ -111,7 +120,7 @@ CQLLibrary "*" *-up- "1" Measure
 StatementDependency "*" *-left- "1" CQLLibrary
 StatementReference "*" *-left- "1" StatementDependency
 
-class User {
+class User <<Collection>> {
     id: ObjectId
     email: String
     first_name: String
