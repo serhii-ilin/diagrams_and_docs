@@ -110,6 +110,8 @@ class MeasureCompiled <<Collection>> {
 MeasureCompiled "1" --* "1..*" CachedELM
 MeasureCompiled "1" --* "1..*" CachedValueSet
 
+Measure "1" --* "1" Library:  > main lib
+
 class Library <<Collection>> {
     ObjectId id  <PK>
     String libraryId
