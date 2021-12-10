@@ -1,0 +1,41 @@
+@startmindmap
+'https://plantuml.com/mindmap-diagram
+
++ troubleshooting \n<b>CQL execution</b>
+++ reproduce issue <b>locally</b>
++++ JS is obfuscated in PROD
++++ use PROD db dump with measures and patients
++++ use the same measure and patient export\n if attached (new)
+++ reproduce in <b>unit tests</b> \n(cqm-execution)
++++ <b>ELM</b> and <b>CQM patient</b> with data elements and <b>ValueSets</b>\ncan be captured in the browser as JSON \nand used to create a UT in cqm-execution project
+++ debugging locally \n(in browser)
++++ use <b>dev</b> profile in rails \nfor clean stack traces in JS
++++ set breakpoints in sources/assets/cqm-execution/dist/browser.self.js
++++ breakpoints:
+++++ capture <b>ELM</b>, <b>Patient</b>, <b>Data elements</b>, <b>ValueSets</b> in cqm-execution::Calculator::calculate
+++++ watch for expressions values \nfrom the evaluation context based on <b>localId</b>
++++++ <b>localId</b> can be found from the UI \n(data-ref-id attribute in the coverage report) \nfor some high level definitions
++++++ Otherwise you can try to quess <b>localId</b> \nbased on <b>ELM</b> of the measure/ library
++++++ See Executor::exec in cql-execution/lib/runtime/executor.js
+++++ set a breakpoint in the corresponding expression execute/exec method \nsee cql-execution for the proper expression class name \nor just based on the stack trace (if available)
++++++ Example: Interval::exec in cql-execution/lib/elm/interval.js
++++ instrumenting
+++++ JS code can be changed/instrumented at runtime \nyou can add/override the target expression to \n1. add logging \nor \n2. change its behavior (e.g. return a different value) \nfor troubleshooting purposes
+****: https://gist.github.com/serhii-ilin/def6ab7c68f894df7399be8ca0f1d68c
+<code>
+let _expression = cqm.models.CQL.Expression
+let _execute = cqm.models.CQL.Expression.prototype.execute
+cqm.models.CQL.Expression.prototype.execute = function(ctx) {
+let execValue = _execute.apply(this, [ctx])
+...
+return execValue
+}
+</code>
+;
+++ Other:
++++ Is it a known issue \nSee https://github.com/cqframework/cql-execution
++++ Talk to SME channel. The BUG may be a feature of CQL
++++ Talk to MITRE
+
+
+@endmindmap
