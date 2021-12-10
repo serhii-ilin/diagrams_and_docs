@@ -1,5 +1,12 @@
 # Diagrams
 
+# Troubleshooting cql execution issues in Bonnie
+<details>
+  <summary>Click to expand!</summary>
+
+![Bonnie Troubleshooting](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/serhii-ilin/diagrams_and_docs/master/debugging-cql-bonnie.puml)
+</details>
+
 # Bonnie FHIR Model
 <details>
   <summary>Click to expand!</summary>

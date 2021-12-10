@@ -1,0 +1,51 @@
+@startuml
+
+start
+
+:list resources from model-info (ts-models);
+while (next resource of FHIR.DomainResource sub-class)
+
+if (not skipResource in config) then (<b>proceed</b>)
+
+:read all attributes;
+
+while (next attribute)
+
+if (
+   not primary timing attribute</b>
+   and
+   not primary path attribute supported by UI
+   and
+   not [id, extension, modifierExtension]
+) then (<b>YES</b>)
+   :types = transformTypes ( fieldInfo.fieldTypeNames.map ) ;
+   note right
+      -> Code if PrimitiveCode
+      -> replace('Primitive', '').replace('\.', '')
+      -> <b>skip</b> if not isTypeSupportedByUI or not isCompositeType
+   end note
+   :add UI metadata for attribute;
+   note right
+    attrDef {
+       path: fieldInfo.fieldName
+       types: fieldInfo.
+       isArray: fieldInfo.isArray
+       valueSets: lookupValueSets(resource, attribute)
+       referenceTypes: lookupReferenceTypes(resource, attribute)
+    }
+   end note
+else (<b>NO</b>)
+
+endif
+
+
+endwhile
+
+else (<b> SKIP </b>)
+endif
+
+endwhile
+
+stop
+
+@enduml
